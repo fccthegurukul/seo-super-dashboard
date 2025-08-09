@@ -4,6 +4,24 @@
 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
 <h2 class="mb-3">Scrape Results for <a href="{{ url }}" target="_blank">{{ url }}</a></h2>
 
+<div class="alert alert-info">
+    <h5><i class="fa-solid fa-magic"></i> Auto Generate & Publish</h5>
+    <p>Generate AI content from this scraped data and automatically publish to your WordPress sites.</p>
+    <form action="{{ url_for('auto_generate_and_publish') }}" method="post" class="row g-3 align-items-end">
+        <input type="hidden" name="scraped_task_id" value="{{ request.args.get('task_id', '') }}">
+        <div class="col-md-8">
+            <label class="form-label">Select Target Sites:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="target_sites" value="all" id="all_sites" checked>
+                <label class="form-check-label" for="all_sites">All configured WordPress sites</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-success w-100"><i class="fa-solid fa-rocket"></i> Auto Generate & Publish</button>
+        </div>
+    </form>
+</div>
+
 <div class="row g-4 mt-2">
     <div class="col-lg-6">
         <div class="card h-100">

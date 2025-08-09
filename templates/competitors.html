@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+<h2 class="mb-3"><i class="fa-solid fa-eye"></i> Competitor Monitoring</h2>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h4>Add New Competitor</h4></div>
+            <div class="card-body">
+                <form action="{{ url_for('add_competitor') }}" method="post">
+                    <div class="mb-3">
+                        <label for="competitor_name" class="form-label">Competitor Name</label>
+                        <input type="text" class="form-control" id="competitor_name" name="competitor_name" required placeholder="Example: TechCrunch">
+                    </div>
+                    <div class="mb-3">
+                        <label for="competitor_url" class="form-label">Website URL</label>
+                        <input type="url" class="form-control" id="competitor_url" name="competitor_url" required placeholder="https://techcrunch.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="keywords" class="form-label">Target Keywords (comma separated)</label>
+                        <input type="text" class="form-control" id="keywords" name="keywords" placeholder="tech, startup, AI">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-plus"></i> Add Competitor</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header"><h4>Monitoring Controls</h4></div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="startMonitoring()"><i class="fa-solid fa-play"></i> Start Auto Monitoring</button>
+                    <form action="{{ url_for('manual_competitor_scan') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-warning w-100"><i class="fa-solid fa-search"></i> Manual Scan All</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><h4>Tracked Competitors ({{ competitors|length }})</h4></div>
+            <div class="card-body">
+                {% if competitors %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>URL</th>
+                                    <th>Keywords</th>
+                                    <th>Last Scan</th>
+                                    <th>New Content</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for competitor in competitors %}
+                                <tr>
+                                    <td><strong>{{ competitor.name }}</strong></td>
+                                    <td><a href="{{ competitor.url }}" target="_blank" class="text-decoration-none">{{ competitor.url[:30] }}...</a></td>
+                                    <td>
+                                        {% for keyword in competitor.keywords[:3] %}
+                                            <span class="badge bg-secondary">{{ keyword }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if competitor.last_scan %}
+                                            <small class="text-muted">{{ competitor.last_scan[:10] }}</small>
+                                        {% else %}
+                                            <span class="text-warning">Never</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set new_count = competitor.new_content_detected|length if competitor.new_content_detected else 0 %}
+                                        {% if new_count > 0 %}
+                                            <span class="badge bg-danger">{{ new_count }} new</span>
+                                        {% else %}
+                                            <span class="text-muted">None</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-users fa-3x mb-3"></i>
+                        <p>No competitors added yet. Add your first competitor to start monitoring!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if opportunities %}
+<div class="card mt-4">
+    <div class="card-header"><h4><i class="fa-solid fa-lightbulb"></i> Content Opportunities ({{ opportunities|length }})</h4></div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for opportunity in opportunities[:6] %}
+            <div class="col-md-6">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ opportunity.competitor }}</h6>
+                        <p class="card-text">
+                            <small><a href="{{ opportunity.url }}" target="_blank" class="text-decoration-none">{{ opportunity.url[:50] }}...</a></small>
+                        </p>
+                        {% if opportunity.analysis.generated_content %}
+                            <p class="card-text"><small class="text-muted">{{ opportunity.analysis.generated_content[:100] }}...</small></p>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-warning" onclick="createContentFromOpportunity('{{ opportunity.url }}')">
+                            <i class="fa-solid fa-magic"></i> Create Better Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startMonitoring() {
+    fetch('/start-competitor-monitoring', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            alert(data.status);
+        })
+        .catch(error => {
+            alert('Error starting monitoring: ' + error);
+        });
+}
+
+function createContentFromOpportunity(url) {
+    // Redirect to scraper with the competitor URL
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/start-scrape';
+    
+    const urlInput = document.createElement('input');
+    urlInput.type = 'hidden';
+    urlInput.name = 'article_url';
+    urlInput.value = url;
+    
+    const publisherInput = document.createElement('input');
+    publisherInput.type = 'hidden';
+    publisherInput.name = 'publisher_name';
+    publisherInput.value = 'Your Brand';
+    
+    form.appendChild(urlInput);
+    form.appendChild(publisherInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

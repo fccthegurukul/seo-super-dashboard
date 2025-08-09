@@ -27,6 +27,49 @@
     </div>
 </div>
 
+<div class="row g-4 mt-2">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><h3><i class="fa-solid fa-robot text-success"></i> AI Content Generator</h3></div>
+            <div class="card-body">
+                <form action="{{ url_for('ai_generate_content') }}" method="post">
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">AI Prompt</label>
+                        <textarea class="form-control" id="prompt" name="prompt" rows="3" required placeholder="Enter your content generation prompt..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100"><i class="fa-solid fa-magic"></i> Generate Content</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><h3><i class="fa-solid fa-eye text-warning"></i> Competitor Monitor</h3></div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('competitors') }}" class="btn btn-warning"><i class="fa-solid fa-users"></i> Manage Competitors</a>
+                    <form action="{{ url_for('manual_competitor_scan') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-warning w-100"><i class="fa-solid fa-search"></i> Scan Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><h3><i class="fa-solid fa-paper-plane text-danger"></i> Auto Publisher</h3></div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('publishing') }}" class="btn btn-danger"><i class="fa-solid fa-cog"></i> Publishing Settings</a>
+                    <form action="{{ url_for('process_queue') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger w-100"><i class="fa-solid fa-play"></i> Process Queue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <hr class="my-4">
 
 <div class="row g-4">
@@ -48,13 +91,23 @@
         </div>
     </div>
     <div class="col-md-4">
-        <h3><i class="fa-solid fa-database"></i> Scanned Sites</h3>
-        <div class="list-group">
-            {% for site in scanned_sites %}
-                <a href="{{ url_for('site_details', site_name=site) }}" class="list-group-item list-group-item-action">{{ site.replace('_', '/').replace('-', '.') }}</a>
-            {% else %}
-                <div class="list-group-item text-muted">No sites scanned yet.</div>
-            {% endfor %}
+        <div class="row g-3">
+            <div class="col-12">
+                <h3><i class="fa-solid fa-database"></i> Scanned Sites</h3>
+                <div class="list-group" style="max-height: 200px; overflow-y: auto;">
+                    {% for site in scanned_sites %}
+                        <a href="{{ url_for('site_details', site_name=site) }}" class="list-group-item list-group-item-action">{{ site.replace('_', '/').replace('-', '.') }}</a>
+                    {% else %}
+                        <div class="list-group-item text-muted">No sites scanned yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-12">
+                <h3><i class="fa-solid fa-lightbulb"></i> Content Opportunities</h3>
+                <div id="opportunities-list" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                    <div class="list-group-item text-muted">Loading opportunities...</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -75,6 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!statusCell) return;
         
         typeCell.innerHTML = data.type === 'Sitemap Scan' ? `<span class="badge bg-primary">Sitemap</span>` : `<span class="badge bg-info">Scraper</span>`;
+        if (data.type === 'AI Generation') typeCell.innerHTML = `<span class="badge bg-success">AI Gen</span>`;
+        if (data.type === 'Competitor Scan') typeCell.innerHTML = `<span class="badge bg-warning">Competitor</span>`;
+        if (data.type === 'Auto Generate & Publish') typeCell.innerHTML = `<span class="badge bg-danger">Auto Pub</span>`;
+        if (data.type === 'Publishing Queue') typeCell.innerHTML = `<span class="badge bg-secondary">Queue</span>`;
+        
         urlCell.innerHTML = `<small>${data.url}</small>`;
         
         let statusHtml = '';
@@ -110,6 +168,26 @@ document.addEventListener('DOMContentLoaded', function() {
             activeIntervals[taskId] = setInterval(() => fetchTaskStatus(taskId), 3000);
         }
     }
+    
+    // Load content opportunities
+    fetch('/api/content-opportunities')
+        .then(response => response.json())
+        .then(opportunities => {
+            const opportunitiesList = document.getElementById('opportunities-list');
+            if (opportunities.length === 0) {
+                opportunitiesList.innerHTML = '<div class="list-group-item text-muted">No opportunities found</div>';
+            } else {
+                opportunitiesList.innerHTML = opportunities.slice(0, 5).map(opp => 
+                    `<div class="list-group-item">
+                        <small><strong>${opp.competitor}</strong></small><br>
+                        <small class="text-muted">${opp.analysis.generated_content ? opp.analysis.generated_content.substring(0, 100) + '...' : 'Analysis available'}</small>
+                    </div>`
+                ).join('');
+            }
+        })
+        .catch(error => {
+            document.getElementById('opportunities-list').innerHTML = '<div class="list-group-item text-danger">Error loading opportunities</div>';
+        });
 });
 </script>
 {% endblock %}
