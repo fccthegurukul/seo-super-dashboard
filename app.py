@@ -91,7 +91,8 @@ def ai_generate_content():
     
     thread = threading.Thread(target=generate_content)
     thread.start()
-    return redirect(url_for('dashboard'))
+    return redirec
+  t(url_for('dashboard'))
 
 @app.route('/add-competitor', methods=['POST'])
 def add_competitor():
