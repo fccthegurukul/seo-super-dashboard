@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+<h2 class="mb-3">Scan Results for <a href="{{ url }}" target="_blank">{{ url }}</a></h2>
+
+{% set status_counts = namespace(ok=0, redirects=0, client_errors=0, server_errors=0, other=0) %}
+{% for item in data %}
+    {% if item.http_status == 200 %}{% set status_counts.ok = status_counts.ok + 1 %}
+    {% elif item.http_status in [301, 302, 307, 308] %}{% set status_counts.redirects = status_counts.redirects + 1 %}
+    {% elif item.http_status is number and 400 <= item.http_status < 500 %}{% set status_counts.client_errors = status_counts.client_errors + 1 %}
+    {% elif item.http_status is number and item.http_status >= 500 %}{% set status_counts.server_errors = status_counts.server_errors + 1 %}
+    {% else %}{% set status_counts.other = status_counts.other + 1 %}{% endif %}
+{% endfor %}
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col"><div class="card text-center p-2"><h5 class="card-title">Total URLs</h5><p class="card-text fs-2">{{ data|length }}</p></div></div>
+    <div class="col"><div class="card text-center p-2 text-bg-success"><h5 class="card-title">OK (2xx)</h5><p class="card-text fs-2">{{ status_counts.ok }}</p></div></div>
+    <div class="col"><div class="card text-center p-2 text-bg-warning"><h5 class="card-title">Redirects (3xx)</h5><p class="card-text fs-2">{{ status_counts.redirects }}</p></div></div>
+    <div class="col"><div class="card text-center p-2 text-bg-danger"><h5 class="card-title">Client Errors (4xx)</h5><p class="card-text fs-2">{{ status_counts.client_errors }}</p></div></div>
+    <div class="col"><div class="card text-center p-2 text-bg-danger"><h5 class="card-title">Server Errors (5xx)</h5><p class="card-text fs-2">{{ status_counts.server_errors }}</p></div></div>
+</div>
+
+<!-- All URLs Table -->
+<div class="card">
+    <div class="card-header">All Scanned URLs</div>
+    <div class="card-body" style="max-height: 70vh; overflow-y: auto;">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Category</th>
+                    <th>Last Modified</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td><small><a href="{{ item.url }}" target="_blank" title="{{ item.url }}">{{ item.url[:80] }}{% if item.url|length > 80 %}...{% endif %}</a></small></td>
+                    <td>
+                        {% if item.http_status == 200 %}
+                            <span class="badge bg-success">200 OK</span>
+                        {% elif item.http_status in [301, 302, 307, 308] %}
+                            <span class="badge bg-warning">Redirect</span>
+                        {% elif item.http_status is number and item.http_status >= 400 %}
+                             <span class="badge bg-danger">{{ item.http_status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ item.http_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge rounded-pill text-bg-light">{{ item.category }}</span></td>
+                    <td>{{ item.last_modified }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

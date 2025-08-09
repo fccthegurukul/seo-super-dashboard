@@ -1,0 +1,56 @@
+[
+    {
+        "url": "https://fccthegurukul.in/locations.kml",
+        "last_modified": "2025-08-08T05:08:55+00:00",
+        "http_status": 200,
+        "content_hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "final_url": "https://fccthegurukul.in/locations.kml",
+        "error": null,
+        "category": "Other Page"
+    },
+    {
+        "url": "https://fccthegurukul.in/tricky-math-and-gk/",
+        "last_modified": "2025-06-28T09:55:07+00:00",
+        "http_status": 200,
+        "content_hash": "62c144e9214131c460e9739a8c371157",
+        "final_url": "https://fccthegurukul.in/tricky-math-and-gk/",
+        "error": null,
+        "category": "Other Page"
+    },
+    {
+        "url": "https://fccthegurukul.in/sample-page/",
+        "last_modified": "2025-03-19T11:30:41+00:00",
+        "http_status": 200,
+        "content_hash": "cd682d09dc25958005eeb048cdfb02cc",
+        "final_url": "https://fccthegurukul.in/sample-page/",
+        "error": null,
+        "category": "Other Page"
+    },
+    {
+        "url": "https://fccthegurukul.in/",
+        "last_modified": "2025-06-28T09:55:07+00:00",
+        "http_status": 200,
+        "content_hash": "f3ba96c9432f059c118e8f37b32212ec",
+        "final_url": "https://fccthegurukul.in/",
+        "error": null,
+        "category": "Homepage"
+    },
+    {
+        "url": "https://fccthegurukul.in/category/uncategorized/",
+        "last_modified": "2025-08-08T20:04:51+00:00",
+        "http_status": 200,
+        "content_hash": "04a522c41fe08a237f40c2b6ff84d98c",
+        "final_url": "https://fccthegurukul.in/category/uncategorized/",
+        "error": null,
+        "category": "Category Page"
+    },
+    {
+        "url": "https://fccthegurukul.in/2025/03/19/hello-world/",
+        "last_modified": "2025-08-08T20:04:51+00:00",
+        "http_status": 200,
+        "content_hash": "a5aabda38c4b7ff587b75952df310e0e",
+        "final_url": "https://fccthegurukul.in/2025/03/19/hello-world/",
+        "error": null,
+        "category": "Other Page"
+    }
+]

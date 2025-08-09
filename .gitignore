@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.venv/
+env/
+.env
+
+# Instance folder for Flask
+instance/
+
+# Scraped data - can be large, you may want to ignore
+# /scraped_data/
+
+# Scans data - can also be large
+# /scans/
+
+# OS generated files
+.DS_Store
+Thumbs.db
